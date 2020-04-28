@@ -26,15 +26,15 @@ end
 local function get_header(users)
     httpd:route({method = 'GET', path = '/kv/:id'}, 
         function(req)              
-            log.info('GET')
-
             local id   = req:stash('id')
             local user = users.index.secondary:get{id}
 
             if user ~= nil then
+                log.info('GET 200 Success')
                 return response(req, 200, json.encode{id = id, value = user['value']})
             end
             
+            log.info('GET 404 Not Found')
             return response(req, 404, "Not Found")
         end
     )
@@ -44,22 +44,24 @@ end
 local function put_header(users)
     httpd:route({method = 'PUT', path = '/kv/:id'}, 
         function(req)              
-            log.info('PUT DATA')
-
             local id   = req:stash('id') 
             local tab = json.decode(req:read())
 
             if tab.value == nil then
+                log.info('PUT 400 Incorrect Body')
                 return response(req, 400, "Incorrect Body")
             end
 
             if user_exists(id, users) ~= false then
                 local user = users.index.secondary:get{id}
                 users:put{user['user_id'] , id, tab.value}
+                log.info('PUT 200 Success')
                 return response(req, 200, 'Success') 
             end
             
             users:put{nil, id, tab.value}
+            log.info('PUT 200 Success')
+            
             return response(req, 200, 'Success') 
         end
     )
@@ -68,14 +70,16 @@ end
 local function delete_header(users)
     httpd:route({method = 'DELETE', path = '/kv/:id'}, 
         function(req)              
-
             local id   = req:stash('id')
             
             if user_exists(id, users) == false then
+                log.info('DELETE 404 Not Found')
                 return response(req, 404, 'Not Found')
             end
 
             users.index.secondary:delete{id}
+            log.info('DELETE 200 Success')
+            
             return response(req, 200, "Success") 
         end
     )
@@ -84,8 +88,23 @@ end
 local function post_header(users)
     httpd:route({method = 'POST', path = '/kv'}, 
         function(req)              
-            log.info('POST DATA')
-            return {status = 400, body = "Incorrect Body"} 
+
+            local tab = json.decode(req:read())
+
+            if tab.key == nil or tab.value == nil then
+                log.info('POST 400 Incorrect Body')
+                return response(req, 400, "Incorrect Body")
+            end
+
+            if user_exists(tab.key, users) == true then
+                log.info('POST 409 Already Exists')
+                return response(req, 409, "Already Exists")
+            end
+            
+            users:insert{nil, tab.key, tab.value}
+            log.info('POST 200 Success')
+            
+            return response(req, 200, "Success") 
         end
     )
 
