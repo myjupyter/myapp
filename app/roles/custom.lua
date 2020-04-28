@@ -52,17 +52,11 @@ local function put_header(users)
         function(req)              
             local id   = req:stash('id') 
             local tab = nil
-            
             local ok, err = pcall(function()
                 tab = json.decode(req:read())
-            end)
+            end)    
 
-            if not ok then 
-                log.info('PUT 400 Incorrect Body')
-                return response(req, 400, "Incorrect Body")
-            end
-
-            if tab.value == nil then
+            if not ok or type(tab.value) ~= 'table' then 
                 log.info('PUT 400 Incorrect Body')
                 return response(req, 400, "Incorrect Body")
             end
@@ -109,12 +103,9 @@ local function post_header(users)
                 tab = json.decode(req:read())
             end)
 
-            if not ok then
-                log.info('POST 400 Incorrect Body')
-                return response(req, 400, "Incorrect Body")
-            end
-
-            if tab.key == nil or tab.value == nil then
+            if not ok or tab.key == nil or tab.value == nil or
+               type(tab.key) ~= 'string' or type(tab.value) ~= 'table'
+               or string.find(tab.key, '/') ~= nil then
                 log.info('POST 400 Incorrect Body')
                 return response(req, 400, "Incorrect Body")
             end
