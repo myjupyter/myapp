@@ -31,7 +31,13 @@ local function get_header(users)
 
             if user ~= nil then
                 log.info('GET 200 Success')
-                return response(req, 200, json.encode{id = id, value = user['value']})
+                return response(
+                        req, 200, 
+                        json.encode{ 
+                            id = id,
+                            value = json.encode(user['value'])
+                        }
+                )
             end
             
             log.info('GET 404 Not Found')
@@ -45,7 +51,16 @@ local function put_header(users)
     httpd:route({method = 'PUT', path = '/kv/:id'}, 
         function(req)              
             local id   = req:stash('id') 
-            local tab = json.decode(req:read())
+            local tab = nil
+            
+            local ok, err = pcall(function()
+                tab = json.decode(req:read())
+            end)
+
+            if not ok then 
+                log.info('PUT 400 Incorrect Body')
+                return response(req, 400, "Incorrect Body")
+            end
 
             if tab.value == nil then
                 log.info('PUT 400 Incorrect Body')
@@ -89,7 +104,15 @@ local function post_header(users)
     httpd:route({method = 'POST', path = '/kv'}, 
         function(req)              
 
-            local tab = json.decode(req:read())
+            local tab = nil
+            local ok, err = pcall(function()
+                tab = json.decode(req:read())
+            end)
+
+            if not ok then
+                log.info('POST 400 Incorrect Body')
+                return response(req, 400, "Incorrect Body")
+            end
 
             if tab.key == nil or tab.value == nil then
                 log.info('POST 400 Incorrect Body')

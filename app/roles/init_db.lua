@@ -12,7 +12,7 @@ local function init(opts)
     users:format({
         {name = 'user_id',  type = 'unsigned'},
         {name = 'nickname', type = 'string'},
-        {name = 'value',    type = 'string'},
+        {name = 'value',    type = 'map'},
     })
 
     box.schema.sequence.create('seq', { if_not_exists = true })
