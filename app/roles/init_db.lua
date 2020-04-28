@@ -4,25 +4,22 @@ local log       = require('log')
 local role_name = 'init_db'
 
 local function init(opts) 
-
+    
     local users = box.schema.space.create('users',
         { if_not_exists = true }
     )
-   
+
     users:format({
-        {'user_id',   'unsigned'},
-        {'nickname',  'string'}
-        {'value',     'string'},
+        {name = 'user_id',  type = 'unsigned'},
+        {name = 'nickname', type = 'string'},
+        {name = 'value',    type = 'string'},
     })
 
-    box.schema.sequence.create{'seq',
-        if_not_exists = true,
-    }
+    box.schema.sequence.create('seq', { if_not_exists = true })
     
     users:create_index('user_id', {
-        type = 'hash',
         parts = {'user_id'},
-        sequence = 'seq'
+        sequence = 'seq',
         if_not_exists = true,
     })
 

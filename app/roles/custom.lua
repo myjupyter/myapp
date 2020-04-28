@@ -2,7 +2,7 @@ local cartridge = require('cartridge')
 local log       = require('log')
 local json      = require('json')
 
-local role_name = 'get'
+local role_name = 'custom'
 
 local httpd = cartridge.service_get('httpd')
 
@@ -15,7 +15,7 @@ local function response(req, code, message)
     return resp
 end
 
-local function user_exists(id)
+local function user_exists(id, users)
     local user = users.index.secondary:get{id}
     if user ~= nil then
         return true
@@ -23,7 +23,7 @@ local function user_exists(id)
     return false
 end
 
-local function get_header()
+local function get_header(users)
     httpd:route({method = 'GET', path = '/kv/:id'}, 
         function(req)              
             log.info('GET')
@@ -41,7 +41,7 @@ local function get_header()
 end
 
 
-local function put_header()
+local function put_header(users)
     httpd:route({method = 'PUT', path = '/kv/:id'}, 
         function(req)              
             log.info('PUT DATA')
@@ -53,25 +53,25 @@ local function put_header()
                 return response(req, 400, "Incorrect Body")
             end
 
-            if user_exists(id) ~= nil then
+            if user_exists(id, users) ~= false then
                 local user = users.index.secondary:get{id}
-                users:put(user.['user_id'] , id, tab.value)
+                users:put{user['user_id'] , id, tab.value}
                 return response(req, 200, 'Success') 
             end
             
-            users:put(nil, id, tab.value)
+            users:put{nil, id, tab.value}
             return response(req, 200, 'Success') 
         end
     )
 end
 
-local function delete_header()
+local function delete_header(users)
     httpd:route({method = 'DELETE', path = '/kv/:id'}, 
         function(req)              
 
             local id   = req:stash('id')
             
-            if user_exists(id) == nil then
+            if user_exists(id, users) == false then
                 return response(req, 404, 'Not Found')
             end
 
@@ -81,7 +81,7 @@ local function delete_header()
     )
 end
 
-local function post_header()
+local function post_header(users)
     httpd:route({method = 'POST', path = '/kv'}, 
         function(req)              
             log.info('POST DATA')
@@ -92,11 +92,13 @@ local function post_header()
 end
 
 local function init(opts) 
+    
+    local users = box.space.users
 
-    get_header()
-    put_header()
-    delete_header()
-    post_header()
+    get_header(users)
+    put_header(users)
+    delete_header(users)
+    post_header(users)
 
     return true
 end
