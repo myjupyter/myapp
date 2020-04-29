@@ -34,7 +34,6 @@ local function get_header(users)
                 return response(
                         req, 200, 
                         json.encode{ 
-                            id = id,
                             value = json.encode(user['value'])
                         }
                 )
