@@ -1,4 +1,4 @@
 myapp.router:
-  workdir: ./tmp/db_dev/3301
-  advertise_uri: localhost:3301
+  workdir: ./tmp/db_dev/3302
+  advertise_uri: localhost:3302
   http_port: 8081

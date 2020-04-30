@@ -105,17 +105,17 @@ local function post_header(users)
             if not ok or tab.key == nil or tab.value == nil or
                type(tab.key) ~= 'string' or type(tab.value) ~= 'table'
                or string.find(tab.key, '/') ~= nil then
-                log.info('POST 400 Incorrect Body '..tab.key)
+                log.info('POST 400 Incorrect Body ')
                 return response(req, 400, "Incorrect Body")
             end
 
             if user_exists(tab.key, users) == true then
-                log.info('POST 409 Already Exists '..tab.key)
+                log.info('POST 409 Already Exists ')
                 return response(req, 409, "Already Exists")
             end
             
             users:insert{nil, tab.key, tab.value}
-            log.info('POST 200 Success '..tab.key)
+            log.info('POST 200 Success ')
             
             return response(req, 200, "Success") 
         end
