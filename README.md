@@ -22,5 +22,5 @@
 
 - curl -i -X GET  ip_address:port/kv/{id}
 - curl -i -X POST -d '{"key":"test", "value":{"something":["1", "2", "3"]}}' ip_address:port/kv
-- curl -i -X PUT -d '{"value":{"something":["1", "2", "3"]}}' ip_address:port/kv/something
+- curl -i -X PUT -d '{"value":{"something":["1", "2", "3"]}}' ip_address:port/kv/test
 - curl -i -X DELETE ip_address:port/kv/{id}
