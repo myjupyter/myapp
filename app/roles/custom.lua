@@ -30,7 +30,7 @@ local function get_header(users)
             local user = users.index.secondary:get{id}
 
             if user ~= nil then
-                log.info('GET 200 Success')
+                log.info('GET 200 Success '..id)
                 return response(
                         req, 200, 
                         json.encode{ 
@@ -39,7 +39,7 @@ local function get_header(users)
                 )
             end
             
-            log.info('GET 404 Not Found')
+            log.info('GET 404 Not Found '..id)
             return response(req, 404, "Not Found")
         end
     )
@@ -56,19 +56,19 @@ local function put_header(users)
             end)    
 
             if not ok or type(tab.value) ~= 'table' then 
-                log.info('PUT 400 Incorrect Body')
+                log.info('PUT 400 Incorrect Body '..id)
                 return response(req, 400, "Incorrect Body")
             end
 
             if user_exists(id, users) ~= false then
                 local user = users.index.secondary:get{id}
                 users:put{user['user_id'] , id, tab.value}
-                log.info('PUT 200 Success')
+                log.info('PUT 200 Success '..id)
                 return response(req, 200, 'Success') 
             end
             
             users:put{nil, id, tab.value}
-            log.info('PUT 200 Success')
+            log.info('PUT 200 Success '..id)
             
             return response(req, 200, 'Success') 
         end
@@ -81,12 +81,12 @@ local function delete_header(users)
             local id   = req:stash('id')
             
             if user_exists(id, users) == false then
-                log.info('DELETE 404 Not Found')
+                log.info('DELETE 404 Not Found '..id)
                 return response(req, 404, 'Not Found')
             end
 
             users.index.secondary:delete{id}
-            log.info('DELETE 200 Success')
+            log.info('DELETE 200 Success '..id)
             
             return response(req, 200, "Success") 
         end
@@ -105,17 +105,17 @@ local function post_header(users)
             if not ok or tab.key == nil or tab.value == nil or
                type(tab.key) ~= 'string' or type(tab.value) ~= 'table'
                or string.find(tab.key, '/') ~= nil then
-                log.info('POST 400 Incorrect Body')
+                log.info('POST 400 Incorrect Body '..tab.key)
                 return response(req, 400, "Incorrect Body")
             end
 
             if user_exists(tab.key, users) == true then
-                log.info('POST 409 Already Exists')
+                log.info('POST 409 Already Exists '..tab.key)
                 return response(req, 409, "Already Exists")
             end
             
             users:insert{nil, tab.key, tab.value}
-            log.info('POST 200 Success')
+            log.info('POST 200 Success '..tab.key)
             
             return response(req, 200, "Success") 
         end

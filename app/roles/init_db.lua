@@ -29,6 +29,8 @@ local function init(opts)
         if_not_exists = true,
     })
 
+    box.schema.user.grant('guest', 'read', 'universe')
+
     log.info('Database has been inited!')
 
     return true
